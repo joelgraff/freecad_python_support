@@ -117,7 +117,6 @@ class TupleMath(Const):
             for _t in tpl:
                 _result.append(TupleMath.scale(_t, factor))
 
-            print(_result)
             return _result
 
         return tuple([_v * factor for _v in tpl])
@@ -138,7 +137,6 @@ class TupleMath(Const):
         if rhs is none / empty, lhs must be an iterable of tuples
         """
 
-        print(lhs, rhs)
         _sum = TupleMath.add(lhs, rhs)
         _count = 2
 
