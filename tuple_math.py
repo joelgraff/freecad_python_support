@@ -316,3 +316,11 @@ class TupleMath(Const):
             return -1
 
         return 1
+
+    @staticmethod
+    def vector(start_point, end_point):
+        """
+        Return the directed vector between the supplied tuple coordinates
+        """
+
+        return TupleMath.sub(end_point, start_point)
