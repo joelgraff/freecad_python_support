@@ -42,7 +42,7 @@ class TupleMath(Const):
     @staticmethod
     def subtract(lhs, rhs=None):
         """
-        Subtract two tuples
+        Subtract two tuples / return a directed vector from [lhs] to [rhs]
         """
 
         if rhs is None:
@@ -314,11 +314,3 @@ class TupleMath(Const):
             return -1
 
         return 1
-
-    @staticmethod
-    def vector(start_point, end_point):
-        """
-        Return the directed vector between the supplied tuple coordinates
-        """
-
-        return TupleMath.sub(end_point, start_point)
