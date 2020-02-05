@@ -54,7 +54,7 @@ class TupleMath(Const):
             _result = lhs[0]
 
             for _t in lhs[1:]:
-                _result = TupleMath.add(_result, _t)
+                _result = TupleMath.add(_result, -_t)
 
             return _result
 
