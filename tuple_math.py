@@ -161,6 +161,9 @@ class TupleMath(Const):
             for _t in tpl[1:]:
                 _len += TupleMath.length(TupleMath.subtract(_t, _prev))
 
+            if not _len:
+                _len = TupleMath.length(_prev)
+
             return _len
 
         #vector length from origin to point
