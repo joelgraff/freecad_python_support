@@ -80,7 +80,7 @@ class TupleMath(Const):
 
         print(lhs, rhs)
         if not lhs:
-            return ()
+            return (0.0, 0.0, 0.0)
 
         if not rhs:
 
