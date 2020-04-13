@@ -46,7 +46,7 @@ class TupleMath(Const):
         """
 
         if lhs is None:
-            return ()
+            return (0.0, 0.0, 0.0)
 
         if rhs is None:
 
