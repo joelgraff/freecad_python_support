@@ -78,10 +78,11 @@ class TupleMath(Const):
         if rhs is empty / none, lhs must be a list of tuples
         """
 
-        if lhs is None:
+        print(lhs, rhs)
+        if not lhs:
             return ()
 
-        if rhs is None:
+        if not rhs:
 
             assert(isinstance(lhs[0], tuple)),"""
                 TupleMath.add(lhs, rhs): list of tuples required for lhs (rhs is NoneType)
@@ -90,6 +91,7 @@ class TupleMath(Const):
             _result = lhs[0]
 
             for _t in lhs[1:]:
+                print(_result, _t)
                 _result = TupleMath.add(_result, _t)
 
             return _result
@@ -125,6 +127,7 @@ class TupleMath(Const):
 
         _result = []
 
+        print(tpl, factor)
         if isinstance(tpl[0], Iterable):
 
             for _t in tpl:
@@ -149,6 +152,9 @@ class TupleMath(Const):
         lhs / rhs - tuples for which mean is to be computed
         if rhs is none / empty, lhs must be an iterable of tuples
         """
+
+        if not lhs:
+            return (0.0, 0.0, 0.0)
 
         _sum = TupleMath.add(lhs, rhs)
         _count = 2
