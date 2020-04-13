@@ -45,6 +45,9 @@ class TupleMath(Const):
         Subtract two tuples / return a directed vector from [lhs] to [rhs]
         """
 
+        if lhs is None:
+            return ()
+
         if rhs is None:
 
             assert(isinstance(lhs[0], tuple)),"""
@@ -74,6 +77,9 @@ class TupleMath(Const):
         lhs / rhs - tuples to be added
         if rhs is empty / none, lhs must be a list of tuples
         """
+
+        if lhs is None:
+            return ()
 
         if rhs is None:
 
