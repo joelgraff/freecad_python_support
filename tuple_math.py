@@ -58,6 +58,13 @@ class TupleMath(Const):
 
             return _result
 
+        elif isinstance(rhs, list) and isinstance(lhs, list):
+            assert(len(rhs) != len(lhs)), """
+            TupleMath.subtract(lhs, rhs): lists of inequal length
+            """
+
+            return [TupleMath.add(_v, -rhs[_i]) for _i, _v in enumerate(lhs)]
+
         return tuple(map(op_sub, lhs, rhs))
 
     @staticmethod
