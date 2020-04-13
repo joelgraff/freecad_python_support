@@ -78,7 +78,6 @@ class TupleMath(Const):
         if rhs is empty / none, lhs must be a list of tuples
         """
 
-        print(lhs, rhs)
         if not lhs:
             return (0.0, 0.0, 0.0)
 
@@ -91,7 +90,6 @@ class TupleMath(Const):
             _result = lhs[0]
 
             for _t in lhs[1:]:
-                print(_result, _t)
                 _result = TupleMath.add(_result, _t)
 
             return _result
