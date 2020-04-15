@@ -88,8 +88,6 @@ class TupleMath(Const):
         _result = ()
         _last = op2[-1]
 
-        print(op1, op2)
-
         for _i, _v in enumerate(op1):
 
             _op2 = _last
@@ -249,7 +247,6 @@ class TupleMath(Const):
 
         _result = []
 
-        print(tpl, factor)
         if isinstance(tpl[0], Iterable):
 
             for _t in tpl:
