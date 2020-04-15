@@ -105,7 +105,7 @@ class TupleMath(Const):
         return _result
 
     @staticmethod
-    def add(op1, op2):
+    def add(op1, op2=None):
         """
         Add two operands as tuples, lists of tuples, or accumulate
         a single list of tuples (op1)
@@ -114,7 +114,7 @@ class TupleMath(Const):
         return TupleMath._operation(op_add, op1, op2)
 
     @staticmethod
-    def subtract(op1, op2):
+    def subtract(op1, op2=None):
         """
         Subtract two operands as tuples, lists of tuples, or accumulate
         a single list of tuples (op1)
@@ -123,7 +123,7 @@ class TupleMath(Const):
         return TupleMath._operation(op_sub, op1, op2)
 
     @staticmethod
-    def multiply(op1, op2):
+    def multiply(op1, op2=None):
         """
         Multiply two operands as tuples, lists of tuples, or accumulate
         a single list of tuples (op1)
@@ -132,7 +132,7 @@ class TupleMath(Const):
         return TupleMath._operation(op_mul, op1, op2)
 
     @staticmethod
-    def divide(op1, op2):
+    def divide(op1, op2=None):
         """
         Divide two operands as tuples, lists of tuples, or accumulate
         a single list of tuples (op1)
