@@ -54,8 +54,8 @@ class TupleMath(Const):
         """
 
         #early termination for NoneTypes
-        if op1 is None:
-            return
+        if not op1:
+            return ()
 
         #normalize opearnds to lists
         if not isinstance(op1[0], tuple):
