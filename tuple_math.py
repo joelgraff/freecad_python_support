@@ -167,6 +167,9 @@ class TupleMath(Const):
         Subtract two tuples / return a directed vector from [lhs] to [rhs]
         """
 
+        if lhs is None:
+            return (0.0, 0.0, 0.0)
+
         if rhs is None:
 
             assert(isinstance(lhs[0], tuple)),"""
@@ -197,7 +200,10 @@ class TupleMath(Const):
         if rhs is empty / none, lhs must be a list of tuples
         """
 
-        if rhs is None:
+        if not lhs:
+            return (0.0, 0.0, 0.0)
+
+        if not rhs:
 
             assert(isinstance(lhs[0], tuple)),"""
                 TupleMath.add(lhs, rhs): list of tuples required for lhs (rhs is NoneType)
@@ -241,6 +247,7 @@ class TupleMath(Const):
 
         _result = []
 
+        print(tpl, factor)
         if isinstance(tpl[0], Iterable):
 
             for _t in tpl:
