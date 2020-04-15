@@ -32,7 +32,7 @@ from operator import add as op_add
 from operator import mul as op_mul
 from operator import truediv as op_div
 
-from const import Const
+from .const import Const
 
 class TupleMath(Const):
     """
@@ -131,6 +131,7 @@ class TupleMath(Const):
 
         return TupleMath._operation(op_mul, op1, op2)
 
+    @staticmethod
     def divide(op1, op2):
         """
         Divide two operands as tuples, lists of tuples, or accumulate
@@ -139,6 +140,7 @@ class TupleMath(Const):
 
         return TupleMath._operation(op_div, op1, op2)
 
+    @staticmethod
     def scale(tpl, factor):
         """
         Multiply each component of a tuple or list of tuples by a scalar factor
