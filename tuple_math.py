@@ -32,7 +32,7 @@ from operator import add as op_add
 from operator import mul as op_mul
 from operator import truediv as op_div
 
-from .const import Const
+from const import Const
 
 class TupleMath(Const):
     """
@@ -40,7 +40,129 @@ class TupleMath(Const):
     """
 
     @staticmethod
-    def subtract(lhs, rhs=None):
+    def _operation(op, op1, op2):
+        """
+        Generic worker function to perform math operations
+
+        op1, op2 - operands as tuples or lists of tuples
+
+        operation is performed cumulatively on op1 if op2 is None
+
+        where both are defined, operation is performed 1:1 on items, terminating
+        at end of lhs list.  If rhs is shorter than lhs, last rhs element is
+        is repeated for remainder of lhs
+        """
+
+        #early termination for NoneTypes
+        if op1 is None:
+            return
+
+        #normalize opearnds to lists
+        if not isinstance(op1[0], tuple):
+            op1 = [op1]
+
+        if op2 is not None:
+
+            if not op2:
+                op2 = (0, 0, 0)
+
+            if not isinstance(op2[0], tuple):
+                op2 = (op2,)
+
+        #return empty list
+        if not op1:
+            return op1
+
+        #cumulative operations
+        if op2 is None:
+
+            _result = op1[0]
+
+            for _v in op1[1:]:
+                _result = tuple((map(op, _result, _v)))
+
+            return _result
+
+        #per-element operations
+        _len = len(op2)
+        _result = ()
+        _last = op2[-1]
+
+        print(op1, op2)
+
+        for _i, _v in enumerate(op1):
+
+            _op2 = _last
+
+            if _i < _len:
+                _op2 = op2[_i]
+
+            _result = _result + (tuple(map(op, _v, _op2)),)
+
+        if len(_result) == 1:
+            return _result[0]
+
+        return _result
+
+    @staticmethod
+    def add(op1, op2):
+        """
+        Add two operands as tuples, lists of tuples, or accumulate
+        a single list of tuples (op1)
+        """
+
+        return TupleMath._operation(op_add, op1, op2)
+
+    @staticmethod
+    def subtract(op1, op2):
+        """
+        Subtract two operands as tuples, lists of tuples, or accumulate
+        a single list of tuples (op1)
+        """
+
+        return TupleMath._operation(op_sub, op1, op2)
+
+    @staticmethod
+    def multiply(op1, op2):
+        """
+        Multiply two operands as tuples, lists of tuples, or accumulate
+        a single list of tuples (op1)
+        """
+
+        return TupleMath._operation(op_mul, op1, op2)
+
+    def divide(op1, op2):
+        """
+        Divide two operands as tuples, lists of tuples, or accumulate
+        a single list of tuples (op1)
+        """
+
+        return TupleMath._operation(op_div, op1, op2)
+
+    def scale(tpl, factor):
+        """
+        Multiply each component of a tuple or list of tuples by a scalar factor
+        """
+
+        _len = len(tpl)
+
+        #get length of longest tuple in list
+        if isinstance(tpl[0], tuple):
+
+            _len = 0
+            _i = 0
+
+            for _v in tpl:
+
+                _i = len(_v)
+
+                if _i > _len:
+                    _len = _i
+
+        return TupleMath._operation(op_mul, tpl, [factor]*_len)
+
+    @staticmethod
+    def _subtract(lhs, rhs=None):
         """
         Subtract two tuples / return a directed vector from [lhs] to [rhs]
         """
@@ -68,7 +190,7 @@ class TupleMath(Const):
         return tuple(map(op_sub, lhs, rhs))
 
     @staticmethod
-    def add(lhs, rhs=None):
+    def _add(lhs, rhs=None):
         """
         Add two tuples
         lhs / rhs - tuples to be added
@@ -91,7 +213,7 @@ class TupleMath(Const):
         return tuple(map(op_add, lhs, rhs))
 
     @staticmethod
-    def multiply(lhs, rhs=None):
+    def _multiply(lhs, rhs=None):
         """
         Component-wise multiply two tuples
         """
@@ -112,7 +234,7 @@ class TupleMath(Const):
         return tuple(map(op_mul, lhs, rhs))
 
     @staticmethod
-    def scale(tpl, factor):
+    def _scale(tpl, factor):
         """
         Multiply each component of the tuple by a scalar factor
         """
@@ -129,7 +251,7 @@ class TupleMath(Const):
         return tuple([_v * factor for _v in tpl])
 
     @staticmethod
-    def divide(dividend, divisor):
+    def _divide(dividend, divisor):
         """
         Component-wise tuple division
         """
@@ -137,44 +259,68 @@ class TupleMath(Const):
         return tuple(map(op_div, dividend, divisor))
 
     @staticmethod
-    def mean(lhs, rhs=None):
+    def mean(op1, op2=None):
         """
         Compute the arithmetic mean of two or more tuples
         lhs / rhs - tuples for which mean is to be computed
         if rhs is none / empty, lhs must be an iterable of tuples
         """
 
-        _sum = TupleMath.add(lhs, rhs)
-        _count = 2
+        _sum = TupleMath.add(op1, op2)
 
-        if rhs is not None:
-            _count = len(lhs)
+        #assume cumulative add (op1 = list of tuples, op2 = None)
+        _count = len(op1)
+
+        #if op1's first element is a number (not a tuple) and op2 is defined
+        #we're averaging two tuples
+        if not isinstance(op1[0], Iterable):
+
+            if op2:
+                _count = 2
 
         return TupleMath.scale(_sum, 1.0 / _count)
 
     @staticmethod
-    def length(tpl):
+    def length(tpl, ref_point=None):
         """
-        Calculate the length of a tuple
+        Calculate the length of a tuple as a vector from the origin
         If a list of tuples, length is caculated as distance between points
+        if reference is defined, all points are calculated from the reference
         """
 
-        #distance between a list of points
+        _has_ref = ref_point is not None
+
+        #length of a list of points in series or from reference point
         if isinstance(tpl[0], Iterable):
 
-            _len = 0.0
-            _prev = tpl[0]
+            _len = ()
+
+            _prev = tpl[0:]
+
+            if _has_ref:
+                _prev = ref_point
+                _len =\
+                    (TupleMath.length(TupleMath.subtract(tpl[0], _prev),),)
 
             for _t in tpl[1:]:
-                _len += TupleMath.length(TupleMath.subtract(_t, _prev))
+
+                _len += (TupleMath.length(TupleMath.subtract(_t, _prev)),)
+
+                if not _has_ref:
+                    _prev = _t
 
             if not _len:
                 _len = TupleMath.length(_prev)
 
             return _len
 
+        _tpl = tpl[:]
+
+        if _has_ref:
+            _tpl = TupleMath.subtract(tpl, ref_point)[0]
+
         #vector length from origin to point
-        return math.sqrt(sum([_v*_v for _v in tpl]))
+        return math.sqrt(sum([_v*_v for _v in _tpl]))
 
     @staticmethod
     def unit(tpl):
