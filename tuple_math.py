@@ -225,7 +225,12 @@ class TupleMath(Const):
             _tpl = TupleMath.subtract(tpl, ref_point)[0]
 
         #vector length from origin to point
-        return math.sqrt(sum([_v*_v for _v in _tpl]))
+        _result = math.sqrt(sum([_v*_v for _v in _tpl]))
+
+        if len(_result) == 1:
+            return _result[0]
+
+        return _result
 
     @staticmethod
     def unit(tpl):
