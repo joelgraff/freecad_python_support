@@ -225,9 +225,6 @@ class TupleMath(Const):
         #vector length from origin to point
         _result = math.sqrt(sum([_v*_v for _v in _tpl]))
 
-        if len(_result) == 1:
-            return _result[0]
-
         return _result
 
     @staticmethod
