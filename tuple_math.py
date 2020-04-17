@@ -215,6 +215,9 @@ class TupleMath(Const):
             if not _len:
                 _len = TupleMath.length(_prev)
 
+            if len(_len) == 1:
+                return _len[0]
+
             return _len
 
         _tpl = tpl[:]
