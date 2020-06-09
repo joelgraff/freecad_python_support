@@ -187,7 +187,7 @@ class TupleMath(Const):
     def length(tpl, ref_point=None):
         """
         Calculate the length of a tuple as a vector from the origin
-        If a list of tuples, length is caculated as distance between points
+        If a list of tuples, length is calculated as distance between points
         if reference is defined, all points are calculated from the reference
         """
 
