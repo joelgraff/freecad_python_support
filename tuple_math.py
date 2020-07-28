@@ -40,11 +40,14 @@ class TupleMath(Const):
     """
 
     @staticmethod
-    def _operation(op, op1, op2):
+    def _operation(op, op1, op2, fail_on_empty=False):
         """
         Generic worker function to perform math operations
 
         op1, op2 - operands as tuples or lists of tuples
+
+        fail_on_empty - bool to fail if operand(s) are undefined,
+        otherwise return empty set or defined operand
 
         operation is performed cumulatively on op1 if op2 is None
 
@@ -52,6 +55,15 @@ class TupleMath(Const):
         at end of lhs list.  If rhs is shorter than lhs, last rhs element is
         is repeated for remainder of lhs
         """
+
+        #fail on empty
+        if fail_on_empty:
+
+            if not op1 or not op2:
+                return None
+
+            if op1 == () or op2 == ():
+                return None
 
         #early termination for NoneTypes
         if not op1:
@@ -71,7 +83,11 @@ class TupleMath(Const):
 
         #return empty list
         if not op1:
-            return op1
+
+            if fail_on_empty:
+                return None
+
+            return ()
 
         #cumulative operations
         if op2 is None:
@@ -103,43 +119,51 @@ class TupleMath(Const):
         return _result
 
     @staticmethod
-    def add(op1, op2=None):
+    def is_zero(tpl):
+        """
+        REturns true if all elements of the tuple are zero
+        """
+
+        return all(_i==0 for _i in tpl)
+
+    @staticmethod
+    def add(op1, op2=None, fail_on_empty=False):
         """
         Add two operands as tuples, lists of tuples, or accumulate
         a single list of tuples (op1)
         """
 
-        return TupleMath._operation(op_add, op1, op2)
+        return TupleMath._operation(op_add, op1, op2, fail_on_empty)
 
     @staticmethod
-    def subtract(op1, op2=None):
+    def subtract(op1, op2=None, fail_on_empty=False):
         """
         Subtract two operands as tuples, lists of tuples, or accumulate
         a single list of tuples (op1)
         """
 
-        return TupleMath._operation(op_sub, op1, op2)
+        return TupleMath._operation(op_sub, op1, op2, fail_on_empty)
 
     @staticmethod
-    def multiply(op1, op2=None):
+    def multiply(op1, op2=None, fail_on_empty=False):
         """
         Multiply two operands as tuples, lists of tuples, or accumulate
         a single list of tuples (op1)
         """
 
-        return TupleMath._operation(op_mul, op1, op2)
+        return TupleMath._operation(op_mul, op1, op2, fail_on_empty)
 
     @staticmethod
-    def divide(op1, op2=None):
+    def divide(op1, op2=None, fail_on_empty=False):
         """
         Divide two operands as tuples, lists of tuples, or accumulate
         a single list of tuples (op1)
         """
 
-        return TupleMath._operation(op_div, op1, op2)
+        return TupleMath._operation(op_div, op1, op2, fail_on_empty)
 
     @staticmethod
-    def scale(tpl, factor):
+    def scale(tpl, factor, fail_on_empty=False):
         """
         Multiply each component of a tuple or list of tuples by a scalar factor
         """
@@ -159,10 +183,10 @@ class TupleMath(Const):
                 if _i > _len:
                     _len = _i
 
-        return TupleMath._operation(op_mul, tpl, [factor]*_len)
+        return TupleMath._operation(op_mul, tpl, [factor]*_len, fail_on_empty)
 
     @staticmethod
-    def mean(op1, op2=None):
+    def mean(op1, op2=None, fail_on_empty=False):
         """
         Compute the arithmetic mean of two or more tuples
         lhs / rhs - tuples for which mean is to be computed
@@ -181,10 +205,10 @@ class TupleMath(Const):
             if op2:
                 _count = 2
 
-        return TupleMath.scale(_sum, 1.0 / _count)
+        return TupleMath.scale(_sum, 1.0 / _count, fail_on_empty)
 
     @staticmethod
-    def length(tpl, ref_point=None):
+    def length(tpl, ref_point=None, fail_on_empty=False):
         """
         Calculate the length of a tuple as a vector from the origin
         If a list of tuples, length is calculated as distance between points
@@ -202,18 +226,19 @@ class TupleMath(Const):
 
             if _has_ref:
                 _prev = ref_point
-                _len =\
-                    (TupleMath.length(TupleMath.subtract(tpl[0], _prev),),)
+                _len = (TupleMath.length(
+                    TupleMath.subtract(tpl[0], _prev, fail_on_empty),),)
 
             for _t in tpl[1:]:
 
-                _len += (TupleMath.length(TupleMath.subtract(_t, _prev)),)
+                _len += (TupleMath.length(
+                    TupleMath.subtract(_t, _prev, fail_on_empty)),)
 
                 if not _has_ref:
                     _prev = _t
 
             if not _len:
-                _len = TupleMath.length(_prev)
+                _len = TupleMath.length(_prev, fail_on_empty=fail_on_empty)
 
             if len(_len) == 1:
                 return _len[0]
@@ -223,7 +248,7 @@ class TupleMath(Const):
         _tpl = tpl[:]
 
         if _has_ref:
-            _tpl = TupleMath.subtract(tpl, ref_point)[0]
+            _tpl = TupleMath.subtract(tpl, ref_point, fail_on_empty)
 
         #vector length from origin to point
         _result = math.sqrt(sum([_v*_v for _v in _tpl]))
@@ -231,17 +256,17 @@ class TupleMath(Const):
         return _result
 
     @staticmethod
-    def unit(tpl):
+    def unit(tpl, fail_on_empty=False):
         """
         Normalize a tuple / calculate the unit vector
         """
 
-        _length = TupleMath.length(tpl)
+        _length = TupleMath.length(tpl, fail_on_empty)
 
         if not _length:
             return tpl
 
-        return TupleMath.scale(tpl, (1.0 / _length))
+        return TupleMath.scale(tpl, (1.0 / _length), fail_on_empty)
 
     @staticmethod
     def dot(vec1, vec2):
@@ -285,7 +310,12 @@ class TupleMath(Const):
 
         _vec = TupleMath.unit(vector[0:2])
 
-        return math.acos(TupleMath.dot(up, _vec))
+        _angle = math.acos(TupleMath.dot(up, _vec))
+
+        if _vec[0] < 0.0:
+            _angle = math.pi*2.0 - _angle
+
+        return _angle
 
     @staticmethod
     def ortho(tpl, is_ccw=True, x_index=0, y_index=1):
