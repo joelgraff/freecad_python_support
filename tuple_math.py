@@ -41,6 +41,92 @@ class TupleMath(Const):
 
     @staticmethod
     def _operation(op, op1, op2, fail_on_empty=False):
+
+        #default tests for failed operations
+        if op1 is None or op2 is None:
+
+            if fail_on_empty or op1 is None:
+                return None
+
+        _op1 = op1
+        _op2 = op2
+
+        if not isinstance(_op1, Iterable):
+            _op1 = (_op1,)
+
+        #recurse against the list of items in op1 if op2 is undefined
+        if not op2:
+
+            _t = _op1[1:]
+
+            #if op1 is a scalar, return op1
+            if not _t:
+                return _op1
+
+            _result = _op1[0]
+
+            for _v in _op1[1:]:
+                _result = tuple(map(op, _result, _v))
+
+            return _result
+            #otherwise, recurse, operating all subsequent elements
+            #against the first
+            _op1 = (op1[0],)*len(op1)-1
+
+            return tuple(map(op, _op1, _t))
+
+        elif not isinstance(op2, Iterable):
+            _op2 = (_op2,)
+
+        #op1 and op2 are both defined.
+        _nests = [isinstance(_op1[0], Iterable), isinstance(_op2[0], Iterable)]
+
+        #if both operands are not nested iterables, ensure they are
+        #equal length, or pad accordingly and return the operation
+        #if not any(_nests):
+
+        _lens = [len(_op1), len(_op2)]
+        _delta = abs(_lens[0] - _lens[1])
+
+        _op1 = _op1
+        _op2 = _op2
+
+        if _delta:
+
+            _pad = 0
+
+            if _lens[0] < _lens[1]:
+                _op2 = _op2[:_lens[0]]
+
+            else:
+
+                _pad = 0
+
+                if op == op_mul or op == op_div:
+                    _pad = 1
+
+                if any(_nests):
+                    _pad = (_pad,)
+
+                _pad = (_pad,)*_delta
+
+                if _lens[0] > _lens[1]:
+                    _op2 = _op2 + _pad
+
+        _result = ()
+
+        if isinstance(_op1[0], Iterable):
+
+            for _i, _v in enumerate(_op1):
+                _result += (
+                    TupleMath._operation(op, _v, _op2[_i], fail_on_empty),)
+
+            return _result
+
+        return tuple(map(op, _op1, _op2))
+
+    @staticmethod
+    def _dep_operation(op, op1, op2, fail_on_empty=False):
         """
         Generic worker function to perform math operations
 
@@ -67,35 +153,32 @@ class TupleMath(Const):
 
         #early termination for NoneTypes
         if not op1:
-            return ()
-
-        #normalize opearnds to lists
-        if not isinstance(op1[0], tuple):
-            op1 = [op1]
-
-        if op2 is not None:
-
-            if not op2:
-                op2 = (0, 0, 0)
-
-            if not isinstance(op2[0], tuple):
-                op2 = (op2,)
-
-        #return empty list
-        if not op1:
 
             if fail_on_empty:
                 return None
 
             return ()
 
-        #cumulative operations
-        if op2 is None:
+        #normalize opearnds to lists
+        if not isinstance(op1, Iterable):
+            op1 = (op1,)
+
+        #if op2 is none, then return every subsequent element operated
+        #against the first
+        if op2 is not None:
+
+            if not op2:
+                op2 = (0, 0, 0)
+
+            if not isinstance(op2, Iterable):
+                op2 = (op2,)
+
+        else:
 
             _result = op1[0]
 
             for _v in op1[1:]:
-                _result = tuple((map(op, _result, _v)))
+                _result = tuple((map(op, _result, _v)))[0]
 
             return _result
 
@@ -104,6 +187,7 @@ class TupleMath(Const):
         _result = ()
         _last = op2[-1]
 
+        print('\n\tTupleMath._operation()\n\t\tOP1:{}\n\t\tOP2:{}'.format(str(op1), str(op2)))
         for _i, _v in enumerate(op1):
 
             _op2 = _last
@@ -232,7 +316,7 @@ class TupleMath(Const):
             for _t in tpl[1:]:
 
                 _len += (TupleMath.length(
-                    TupleMath.subtract(_t, _prev, fail_on_empty)),)
+                    TupleMath.subtract( _t, _prev, fail_on_empty)),)
 
                 if not _has_ref:
                     _prev = _t
@@ -261,7 +345,7 @@ class TupleMath(Const):
         Normalize a tuple / calculate the unit vector
         """
 
-        _length = TupleMath.length(tpl, fail_on_empty)
+        _length = TupleMath.length(tpl, fail_on_empty=fail_on_empty)
 
         if not _length:
             return tpl
