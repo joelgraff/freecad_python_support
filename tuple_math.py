@@ -126,83 +126,6 @@ class TupleMath(Const):
         return tuple(map(op, _op1, _op2))
 
     @staticmethod
-    def _dep_operation(op, op1, op2, fail_on_empty=False):
-        """
-        Generic worker function to perform math operations
-
-        op1, op2 - operands as tuples or lists of tuples
-
-        fail_on_empty - bool to fail if operand(s) are undefined,
-        otherwise return empty set or defined operand
-
-        operation is performed cumulatively on op1 if op2 is None
-
-        where both are defined, operation is performed 1:1 on items, terminating
-        at end of lhs list.  If rhs is shorter than lhs, last rhs element is
-        is repeated for remainder of lhs
-        """
-
-        #fail on empty
-        if fail_on_empty:
-
-            if not op1 or not op2:
-                return None
-
-            if op1 == () or op2 == ():
-                return None
-
-        #early termination for NoneTypes
-        if not op1:
-
-            if fail_on_empty:
-                return None
-
-            return ()
-
-        #normalize opearnds to lists
-        if not isinstance(op1, Iterable):
-            op1 = (op1,)
-
-        #if op2 is none, then return every subsequent element operated
-        #against the first
-        if op2 is not None:
-
-            if not op2:
-                op2 = (0, 0, 0)
-
-            if not isinstance(op2, Iterable):
-                op2 = (op2,)
-
-        else:
-
-            _result = op1[0]
-
-            for _v in op1[1:]:
-                _result = tuple((map(op, _result, _v)))[0]
-
-            return _result
-
-        #per-element operations
-        _len = len(op2)
-        _result = ()
-        _last = op2[-1]
-
-        print('\n\tTupleMath._operation()\n\t\tOP1:{}\n\t\tOP2:{}'.format(str(op1), str(op2)))
-        for _i, _v in enumerate(op1):
-
-            _op2 = _last
-
-            if _i < _len:
-                _op2 = op2[_i]
-
-            _result = _result + (tuple(map(op, _v, _op2)),)
-
-        if len(_result) == 1:
-            return _result[0]
-
-        return _result
-
-    @staticmethod
     def is_zero(tpl):
         """
         REturns true if all elements of the tuple are zero
@@ -371,17 +294,15 @@ class TupleMath(Const):
         Return the projection of vec1 on vec2
         vec1 - Vector to project in tuple form
         vec2 - Vector onto which to project in tuple form
-        unit - vec2 is a unit vector
+        unit - indicates vec2 is a unit vector to save on length calc
         """
 
         _vec2_len = 1.0
 
         if not unit:
-            _vec2_len = TupleMath.length(vec2)
+            _vec2_len = TupleMath.length(vec2)**2
 
-        _dot = TupleMath.dot(vec1, vec2)
-
-        return TupleMath.scale(_dot/_vec2_len, vec2)
+        return TupleMath.scale(vec2, TupleMath.dot(vec1, vec2) / _vec2_len)
 
     @staticmethod
     def bearing(vector, up=(0.0, 1.0)):
@@ -433,10 +354,33 @@ class TupleMath(Const):
         elif _delta > 0:
             lhs = lhs + (0.0,)*(_delta)
 
-        for _i, _v in enumerate(lhs):
-            _distance += abs(rhs[_i] - _v)
+        return TupleMath._manhattan(lhs, rhs)
 
-        return _distance
+    @staticmethod
+    def boolean(tpl):
+        """
+        Return a numeric tuple as a tuple of booleans.
+        Zero = False, non-zero = True
+        """
+
+        return TupleMath.invert(TupleMath.invert(tpl))
+
+    @staticmethod
+    def invert(tpl):
+        """
+        Boolean inversion of a tuple.  Non-zero values are returned zero.
+        Zero values are returned as one.
+        """
+
+        return tuple([not _v for _v in tpl])
+
+    @staticmethod
+    def _manhattan(lhs, rhs):
+        """
+        Optimized manhattan distance, with no tuple length checks
+        """
+
+        return [abs(rhs[_i] - _v) for _i, _v in enumerate(lhs)]
 
     @staticmethod
     def cross(src, dest, components=None):
