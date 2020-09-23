@@ -55,7 +55,7 @@ class TupleMath(Const):
             _op1 = (_op1,)
 
         #recurse against the list of items in op1 if op2 is undefined
-        if not op2:
+        if op2 is None or ():
 
             _t = _op1[1:]
 
@@ -303,6 +303,19 @@ class TupleMath(Const):
             _vec2_len = TupleMath.length(vec2)**2
 
         return TupleMath.scale(vec2, TupleMath.dot(vec1, vec2) / _vec2_len)
+
+    @staticmethod
+    def bearing_vector(angle):
+        """
+        Return a 2D vector in tuple form given the specified angle in radians
+        """
+
+        if not angle:
+            return None
+
+        _angle = float(angle)
+
+        return (math.sin(_angle), math.cos(_angle), 0.0)
 
     @staticmethod
     def bearing(vector, up=(0.0, 1.0)):
