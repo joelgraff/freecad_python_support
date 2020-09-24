@@ -88,30 +88,18 @@ class TupleMath(Const):
         _lens = [len(_op1), len(_op2)]
         _delta = abs(_lens[0] - _lens[1])
 
-        _op1 = _op1
-        _op2 = _op2
-
         if _delta:
 
             _pad = 0
 
+            #truncate the second operand to match the length of the first
             if _lens[0] < _lens[1]:
                 _op2 = _op2[:_lens[0]]
 
-            else:
-
-                _pad = 0
-
-                if op == op_mul or op == op_div:
-                    _pad = 1
-
-                if any(_nests):
-                    _pad = (_pad,)
-
-                _pad = (_pad,)*_delta
-
-                if _lens[0] > _lens[1]:
-                    _op2 = _op2 + _pad
+            #pad the end of the second operand by the last value to match the
+            #number of elements in the first
+            elif _lens[0] > _lens[1]:
+                _op2 += (_op2[-1],)*_delta
 
         _result = ()
 
