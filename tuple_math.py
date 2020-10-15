@@ -217,7 +217,7 @@ class TupleMath(Const):
 
             _len = ()
 
-            _prev = tpl[0:]
+            _prev = tpl[0]
 
             if _has_ref:
                 _prev = ref_point
