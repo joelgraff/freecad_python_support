@@ -281,7 +281,7 @@ class TupleMath(Const):
         """
         Return the projection of vec1 on vec2
         vec1 - Vector to project in tuple form
-        vec2 - Vector onto which to project in tuple form
+        vec2 - Target vector onto which projection is made in tuple form
         unit - indicates vec2 is a unit vector to save on length calc
         """
 
@@ -451,3 +451,13 @@ class TupleMath(Const):
             return -1
 
         return 1
+
+    @staticmethod
+    def angle_between(vec1, vec2):
+        """
+        Return the angle between two vectors using dot product
+        """
+
+        _denom = TupleMath.length(vec1) * TupleMath.length(vec2)
+
+        return math.acos(TupleMath.dot(vec1, vec2) / _denom)
