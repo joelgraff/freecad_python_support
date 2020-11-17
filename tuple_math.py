@@ -25,6 +25,9 @@ Utility functions
 
 import math
 
+from typing import Final
+from types import SimpleNamespace
+
 from collections.abc import Iterable
 
 from operator import sub as op_sub
@@ -38,6 +41,13 @@ class TupleMath(Const):
     """
     Math support functions for tuples
     """
+
+    ORIGIN: Final = (0.0, 0.0, 0.0)
+
+    AXIS: Final = SimpleNamespace(
+        X=(1.0, 0.0, 0.0),
+        Y=(0.0, 1.0, 0.0),
+        Z=(0.0, 0.0, 1.0))
 
     @staticmethod
     def _operation(op, op1, op2, fail_on_empty=False):
@@ -203,9 +213,30 @@ class TupleMath(Const):
         return TupleMath.scale(_sum, 1.0 / _count, fail_on_empty)
 
     @staticmethod
+    def _length(vector, ref=ORIGIN, fail_on_empty=False):
+        """
+        Calculate the length of a tuple or tuples.
+        Reference - origin
+        If multiple vectors are passed in vector, assumes ordered list of points
+        and returns length of resulting polyline
+        """
+
+        #assume ordered list of points / polyline
+        if isinstance(vector[0], Iterable):
+
+            _point_pairs = zip(ref + vector[1:], vector)
+            return sum(
+                (TupleMath.subtract(_w, _v, fail_on_empty)\
+                    for _v, _w in _point_pairs)
+            )
+
+        #vector length from reference to point
+        return math.sqrt(sum((_v**2 for _v in vector)))
+
+    @staticmethod
     def length(tpl, ref_point=None, fail_on_empty=False):
         """
-        Calculate the length of a tuple as a vector from the origin
+        Calculate the length of a tuple as a vector from the reference
         If a list of tuples, length is calculated as distance between points
         if reference is defined, all points are calculated from the reference
         """
@@ -256,7 +287,7 @@ class TupleMath(Const):
         Normalize a tuple / calculate the unit vector
         """
 
-        _length = TupleMath.length(tpl, fail_on_empty=fail_on_empty)
+        _length = TupleMath._length(tpl, fail_on_empty=fail_on_empty)
 
         if not _length:
             return tpl
@@ -269,12 +300,7 @@ class TupleMath(Const):
         Calculate the dot product of two tuples
         """
 
-        _sum = 0.0
-
-        for _i, _v in enumerate(vec1):
-            _sum += _v * vec2[_i]
-
-        return _sum
+        return sum((_v*_w for _v, _w in zip(vec1, vec2)))
 
     @staticmethod
     def project(vec1, vec2, unit=False):
@@ -288,7 +314,7 @@ class TupleMath(Const):
         _vec2_len = 1.0
 
         if not unit:
-            _vec2_len = TupleMath.length(vec2)**2
+            _vec2_len = TupleMath._length(vec2)**2
 
         return TupleMath.scale(vec2, TupleMath.dot(vec1, vec2) / _vec2_len)
 
@@ -306,20 +332,77 @@ class TupleMath(Const):
         return (math.sin(_angle), math.cos(_angle), 0.0)
 
     @staticmethod
-    def bearing(vector, up=(0.0, 1.0)):
+    def _angle_from_dot(vector, ref):
         """
-        Get the bearing of a vector in tuple form
+        Get the bearing of a vector in tuple form.
+        ref - unit reference vector from which rotation begins
+        vector - unit target vector toward which rotation occurs
         """
 
+        #cmopute angle via dot product
+        _dot = TupleMath.dot(ref, vector)
+        return math.acos(_dot), _dot
+
+    @staticmethod
+    def _undirected_bearing(vector, up=(0.0, 1.0)):
+        """
+        Return the undirected bearing of the vector from up
+        """
+
+        #calculate unit up vector if not default
         if up != (0.0, 1.0):
             up = TupleMath.unit(up[0:2])
 
+        #calculate unit vector of point
         _vec = TupleMath.unit(vector[0:2])
 
-        _angle = math.acos(TupleMath.dot(up, _vec))
+        return None #_angle_from_dot(vector, up)[0]
 
-        if _vec[0] < 0.0:
+    @staticmethod
+    def _directed_bearing(vector, up=(0.0, 1.0)):
+        """
+        Get the directed bearing of a vector in tuple form.
+        """
+
+        #_b = _angle_from_dot()
+        #return _bearing
+
+    @staticmethod
+    def bearing(vector, up=(0.0, 1.0)):
+        """
+        Get the bearing of a vector in tuple form.  Constrain to specified range
+        CCW = +, CW = -
+        """
+
+        #calculate unit up vector if not default
+        if up != (0.0, 1.0):
+            up = TupleMath.unit(up[0:2])
+
+        #calculate unit vector of point
+        _vec = TupleMath.unit(vector[0:2])
+
+        #cmopute angle via dot product
+        _dot = TupleMath.dot(up, _vec)
+        _angle = math.acos(_dot)
+
+        if _dot > 0.0:
+        #if _vec[0] < 0.0:
             _angle = math.pi*2.0 - _angle
+
+        return _angle
+
+    @staticmethod
+    def signed_bearing(src, dest):
+        """
+        Calculate the signed bearing between two vectors
+        """
+
+        _angle = TupleMath.bearing(src, dest)
+        _cross = TupleMath.cross(src, dest)
+        _dot = TupleMath.dot(_cross, (0.0, 0.0, 1.0))
+
+        if _dot < 0.0:
+            _angle *= -1.0
 
         return _angle
 
@@ -422,21 +505,6 @@ class TupleMath(Const):
         return _result
 
     @staticmethod
-    def signed_bearing(src, dest):
-        """
-        Calculate the signed bearing between two vectors
-        """
-
-        _angle = TupleMath.bearing(src, dest)
-        _cross = TupleMath.cross(src, dest)
-        _dot = TupleMath.dot(_cross, (0.0, 0.0, 1.0))
-
-        if _dot < 0.0:
-            _angle *= -1.0
-
-        return _angle
-
-    @staticmethod
     def point_direction(point, vector, epsilon=0.000001):
         """
         Returns: -1 if left, 1 if right, 0 if on line
@@ -458,6 +526,6 @@ class TupleMath(Const):
         Return the angle between two vectors using dot product
         """
 
-        _denom = TupleMath.length(vec1) * TupleMath.length(vec2)
+        _denom = TupleMath._length(vec1) * TupleMath._length(vec2)
 
         return math.acos(TupleMath.dot(vec1, vec2) / _denom)
