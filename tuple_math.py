@@ -221,19 +221,19 @@ class TupleMath(Const):
 
             if _has_ref:
                 _prev = ref_point
-                _len = (TupleMath.length(
+                _len = (TupleMath._length(
                     TupleMath.subtract(tpl[0], _prev, fail_on_empty),),)
 
             for _t in tpl[1:]:
 
-                _len += (TupleMath.length(
+                _len += (TupleMath._length(
                     TupleMath.subtract( _t, _prev, fail_on_empty)),)
 
                 if not _has_ref:
                     _prev = _t
 
             if not _len:
-                _len = TupleMath.length(_prev, fail_on_empty=fail_on_empty)
+                _len = TupleMath._length(_prev, fail_on_empty=fail_on_empty)
 
             if len(_len) == 1:
                 return _len[0]
@@ -256,7 +256,7 @@ class TupleMath(Const):
         Normalize a tuple / calculate the unit vector
         """
 
-        _length = TupleMath.length(tpl, fail_on_empty=fail_on_empty)
+        _length = TupleMath._length(tpl, fail_on_empty=fail_on_empty)
 
         if not _length:
             return tpl
@@ -288,7 +288,7 @@ class TupleMath(Const):
         _vec2_len = 1.0
 
         if not unit:
-            _vec2_len = TupleMath.length(vec2)**2
+            _vec2_len = TupleMath._length(vec2)**2
 
         return TupleMath.scale(vec2, TupleMath.dot(vec1, vec2) / _vec2_len)
 
@@ -458,6 +458,6 @@ class TupleMath(Const):
         Return the angle between two vectors using dot product
         """
 
-        _denom = TupleMath.length(vec1) * TupleMath.length(vec2)
+        _denom = TupleMath._length(vec1) * TupleMath._length(vec2)
 
         return math.acos(TupleMath.dot(vec1, vec2) / _denom)
