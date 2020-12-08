@@ -385,9 +385,9 @@ class TupleMath(Const):
         _dot = TupleMath.dot(up, _vec)
         _angle = math.acos(_dot)
 
-        if _dot > 0.0:
+        #if _dot > 0.0:
         #if _vec[0] < 0.0:
-            _angle = math.pi*2.0 - _angle
+        #    _angle = math.pi*2.0 - _angle
 
         return _angle
 
