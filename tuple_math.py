@@ -368,26 +368,43 @@ class TupleMath(Const):
         #return _bearing
 
     @staticmethod
+    def interior_angle(vector, reference):
+        """
+        Calculate the interior angle between the vector and it's reference
+        CCW = +, CW = -
+        """
+
+        reference = TupleMath.unit(reference[0:2])
+
+        #calculate unit vector of point
+        _vec = TupleMath.unit(vector[0:2])
+
+        #compute angle via dot product and return
+        return math.acos(TupleMath.dot(reference, _vec))
+
+    @staticmethod
     def bearing(vector, up=(0.0, 1.0)):
         """
         Get the bearing of a vector in tuple form.  Constrain to specified range
         CCW = +, CW = -
         """
 
-        #calculate unit up vector if not default
-        if up != (0.0, 1.0):
-            up = TupleMath.unit(up[0:2])
+        if len(up) == 2:
+            up += (0.0,)
 
-        #calculate unit vector of point
-        _vec = TupleMath.unit(vector[0:2])
+        _cross = TupleMath.cross(vector, up)
+        _det = TupleMath.dot((0.0, 0.0, 1.0), _cross)
+        _dot = TupleMath.dot(vector, up)
 
-        #cmopute angle via dot product
-        _dot = TupleMath.dot(up, _vec)
-        _angle = math.acos(_dot)
+        _angle = math.atan2(_det, _dot)
 
-        if _dot > 0.0:
+        return _angle
+
+        _angle = TupleMath.interior_angle(vector, up)
+
+        #if _dot > 0.0:
         #if _vec[0] < 0.0:
-            _angle = math.pi*2.0 - _angle
+            #_angle = math.pi*2.0 - _angle
 
         return _angle
 
