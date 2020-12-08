@@ -400,14 +400,6 @@ class TupleMath(Const):
 
         return _angle
 
-        _angle = TupleMath.interior_angle(vector, up)
-
-        #if _dot > 0.0:
-        #if _vec[0] < 0.0:
-        #    _angle = math.pi*2.0 - _angle
-
-        return _angle
-
     @staticmethod
     def signed_bearing(src, dest):
         """
