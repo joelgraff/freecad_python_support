@@ -514,6 +514,15 @@ class TupleMath(Const):
         return _result
 
     @staticmethod
+    def signs(point):
+        """
+        Returns an signed n-tuple of 1's, copying the sign of the passed tuple
+        (-3.14159, 4.96) = (-1, 1)
+        """
+
+        return tuple([int(_v / abs(_v)) if _v != 0 else 0 for _v in point])
+
+    @staticmethod
     def point_direction(point, vector, epsilon=0.000001):
         """
         Returns: -1 if left, 1 if right, 0 if on line
